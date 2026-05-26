@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual env
+.venv/
+
+# Environment
+.env
+
+# Build artifacts
+build/
+dist/
+
+# Project data caches (parquet cache lives at the project root, not in
+# src/cs_agent/data which is the source-code package). Anchor with a leading
+# slash so we don't accidentally exclude the data/ subpackage inside src/.
+/data/
+*.parquet
+
+# LangGraph persistence (DB + SQLite sidecar files: -journal, -wal, -shm)
+/checkpoints.sqlite
+/checkpoints.sqlite-*
+
+# Per-user profiles (PII-shaped, even if synthetic)
+/profiles/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Other
+.windsurf/
+.kiro/
+.claude/
