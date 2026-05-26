@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Checks schema",
+  "description": "Schema for schemas/checks/ fragment files - code quality checks registry, config, and guidance. Each file is merged at build/runtime.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "scope", "handler"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "scope": { "type": "string" },
+          "category": { "type": "string", "description": "Group/category for UI (e.g. structure, naming, documentation)." },
+          "fix": { "type": "string" },
+          "example": { "type": "string", "description": "Optional one-line example for UI." },
+          "handler": { "type": "string" },
+          "parameters": {
+            "type": "array",
+            "description": "Optional. User-customizable arguments for this rule (e.g. max_lines integer 300). UI can expose and validate.",
+            "items": {
+              "type": "object",
+              "required": ["name", "type", "config_key"],
+              "properties": {
+                "name": { "type": "string", "description": "Display name (e.g. max_lines)." },
+                "type": { "type": "string", "enum": ["integer", "string", "boolean"], "description": "Validation type." },
+                "config_key": { "type": "string", "description": "Key in config YAML (e.g. max_lines_per_file)." },
+                "default": { "description": "Default value (integer, string, or boolean)." },
+                "min": { "type": "integer", "description": "Optional min for integer." },
+                "max": { "type": "integer", "description": "Optional max for integer." }
+              }
+            }
+          }
+        }
+      }
+    },
+    "check_exceptions": {
+      "type": "object",
+      "description": "Per-check scope: optional include_paths (only these in scope), paths (exclude). Key = check id. Repo overrides/merges global.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "include_paths": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Optional. Repo-relative path or prefix to include (only these files in scope). If empty, all files in scope subject to paths."
+          },
+          "paths": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Repo-relative path (exact) or prefix (end with /) to exclude. Example: web/ or go/cmd/fon/main.go"
+          },
+          "skip_symbols": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "duplicate_symbols only: symbol names to never flag (e.g. __init__, setup). Merged with built-in framework patterns."
+          }
+        }
+      }
+    },
+    "max_lines_per_file": { "type": "integer" },
+    "max_lines_per_file_python": { "type": "integer" },
+    "max_lines_per_file_go": { "type": "integer" },
+    "max_lines_per_file_js_ts": { "type": "integer" },
+    "max_files_per_directory": { "type": "integer" },
+    "lines_extensions": { "type": "array", "items": { "type": "string" }, "description": "File extensions checked by the lines (line count) check (e.g. .go, .py, .tsx)." },
+    "run_hardcoded_check": { "type": "boolean", "description": "Optional. When true, hardcoded_values failures count as fail (not warning)." },
+    "strict_optional_checks": { "type": "array", "items": { "type": "string" }, "description": "Optional check IDs that should fail the run when they fail. Default: optional checks show as warnings only." },
+    "docs": { "type": "string", "description": "Comma-separated doc targets to generate on every check: cursor, kiro, srcmap. Overridden by --docs and FON_CHECK_DOCS." },
+    "exclude_dirs": { "type": "array", "items": { "type": "string" } },
+    "skip_paths": { "type": "array", "items": { "type": "string" } },
+    "well_known_yaml_basenames": { "type": "array", "items": { "type": "string" }, "description": "YAML filenames excluded from schema reference (lockfiles, package-manager formats). From schemas/checks/well-known-files.yaml." },
+    "skip_basenames": { "type": "array", "items": { "type": "string" }, "description": "Basenames skipped from path-based checks (tool configs, e.g. tailwind.config.js). From schemas/checks/well-known-files.yaml." },
+    "naming": {
+      "type": "object",
+      "properties": {
+        "skip_directories": { "type": "array", "items": { "type": "string" } },
+        "python_special_files": { "type": "array", "items": { "type": "string" } },
+        "go_file_naming_enabled": { "type": "boolean", "description": "Enable snake_case filename enforcement for Go files." },
+        "python_file_naming_enabled": { "type": "boolean", "description": "Enable snake_case filename enforcement for Python files." },
+        "javascript_file_naming_enabled": { "type": "boolean", "description": "Enable camelCase/PascalCase filename enforcement for JavaScript and JSX files." },
+        "typescript_file_naming_enabled": { "type": "boolean", "description": "Enable camelCase/PascalCase filename enforcement for TypeScript and TSX files." },
+        "html_file_naming_enabled": { "type": "boolean", "description": "Enable kebab-case filename enforcement for HTML files." },
+        "css_file_naming_enabled": { "type": "boolean", "description": "Enable kebab-case filename enforcement for CSS files." },
+        "web_asset_exclude_basenames": { "type": "array", "items": { "type": "string" }, "description": "Industry-standard web tool config filenames to exclude from kebab-case naming (e.g. postcss.config.js, tailwind.config.js)." },
+        "web_asset_extensions": { "type": "array", "items": { "type": "string" }, "description": "Extensions covered by the web_assets check (e.g. .js, .tsx, .css)." },
+        "web_asset_naming_extensions": { "type": "array", "items": { "type": "string" }, "description": "Legacy subset of web_asset_extensions that should have naming enforced. Used only as a fallback when the new per-family booleans are unset." },
+        "language_standard_basenames": { "type": "array", "items": { "type": "string" }, "description": "Exact filenames that are standard for a language or framework and should be exempt from generic naming-style checks (e.g. vite-env.d.ts)." },
+        "language_standard_regexes": { "type": "array", "items": { "type": "string" }, "description": "Regex patterns for industry-standard filenames that should be exempt from generic naming-style checks (e.g. ^test_.*\\\\.py$, ^.*\\\\.test\\\\.ts$)." },
+        "patterns": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "regex": { "type": "string" },
+              "style": { "type": "string" },
+              "example": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "language_conventions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "docstrings": {
+      "type": "object",
+      "properties": {
+        "python": {
+          "type": "object",
+          "properties": {
+            "audit_dirs": { "type": "array", "items": { "type": "string" } },
+            "skip_patterns": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "go": {
+          "type": "object",
+          "properties": {
+            "audit_dirs": { "type": "array", "items": { "type": "string" } },
+            "skip_patterns": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "js": {
+          "type": "object",
+          "properties": {
+            "audit_dirs": { "type": "array", "items": { "type": "string" } },
+            "skip_patterns": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "guidance": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "bad_example": { "type": "string" },
+          "good_example": { "type": "string" }
+        }
+      }
+    },
+    "missing_translation": {
+      "type": "object",
+      "description": "Optional config for the missing_translation (i18n) check: YAML locale files, namespaces, and getter-to-namespace mapping.",
+      "properties": {
+        "locale_files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string", "description": "Path or glob, e.g. packages/frontend/src/locales/*.yaml or web/src/locales" },
+              "format": { "type": "string", "enum": ["yaml", "json"], "description": "Locale file format" },
+              "namespaced": { "type": "boolean", "description": "If true, top-level keys are namespaces (e.g. chat, appShell, login)" }
+            }
+          }
+        },
+        "namespace_from_call": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Map getter name to namespace, e.g. getLoginT: login, getChatT: chat"
+        }
+      }
+    }
+  }
+}

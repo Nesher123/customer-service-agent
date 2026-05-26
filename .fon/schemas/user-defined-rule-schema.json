@@ -1,0 +1,535 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "User-defined rule schema",
+  "description": "User-defined rules (created via \"fon add new rule\" or added from .mdc, .yaml, etc.). Stored under .fon/rules/user-defined/.",
+  "type": "object",
+  "required": [
+    "id",
+    "rule"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Kebab-case rule identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name"
+    },
+    "description": {
+      "type": "string",
+      "description": "What this rule checks"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "error",
+        "warning",
+        "info"
+      ],
+      "default": "warning"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "repo",
+        "global"
+      ],
+      "default": "repo"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "source": {
+      "type": ["object", "null"],
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "string"
+        },
+        "content_hash": {
+          "type": "string"
+        },
+        "origin": {
+          "type": "string",
+          "description": "user_defined when end-user created via chat"
+        }
+      }
+    },
+    "rule": {
+      "$ref": "#/definitions/condition"
+    },
+    "message": {
+      "type": "string",
+      "description": "Failure message with {{variables}}"
+    },
+    "fix_hint": {
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "condition": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/file_match"
+        },
+        {
+          "$ref": "#/definitions/content_match"
+        },
+        {
+          "$ref": "#/definitions/file_exists"
+        },
+        {
+          "$ref": "#/definitions/line_count"
+        },
+        {
+          "$ref": "#/definitions/file_count"
+        },
+        {
+          "$ref": "#/definitions/key_exists"
+        },
+        {
+          "$ref": "#/definitions/key_value"
+        },
+        {
+          "$ref": "#/definitions/content_starts_with"
+        },
+        {
+          "$ref": "#/definitions/dependency"
+        },
+        {
+          "$ref": "#/definitions/logic"
+        },
+        {
+          "$ref": "#/definitions/structural"
+        },
+        {
+          "$ref": "#/definitions/code_check"
+        },
+        {
+          "$ref": "#/definitions/cross_file"
+        }
+      ]
+    },
+    "file_match": {
+      "type": "object",
+      "required": [
+        "type",
+        "glob"
+      ],
+      "properties": {
+        "type": {
+          "const": "file_match"
+        },
+        "glob": {
+          "type": "string"
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "content_match": {
+      "type": "object",
+      "required": [
+        "type",
+        "pattern",
+        "mode"
+      ],
+      "properties": {
+        "type": {
+          "const": "content_match"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "must_contain",
+            "must_not_contain"
+          ]
+        },
+        "case_sensitive": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "file_exists": {
+      "type": "object",
+      "required": [
+        "type",
+        "mode"
+      ],
+      "properties": {
+        "type": {
+          "const": "file_exists"
+        },
+        "path": {
+          "type": "string"
+        },
+        "glob": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "must_exist",
+            "must_not_exist"
+          ]
+        }
+      }
+    },
+    "line_count": {
+      "type": "object",
+      "required": [
+        "type",
+        "glob",
+        "operator",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "line_count"
+        },
+        "glob": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "lte",
+            "gte",
+            "eq"
+          ]
+        },
+        "value": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "file_count": {
+      "type": "object",
+      "required": [
+        "type",
+        "glob",
+        "operator",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "file_count"
+        },
+        "glob": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "lte",
+            "gte",
+            "eq"
+          ]
+        },
+        "value": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "key_exists": {
+      "type": "object",
+      "required": [
+        "type",
+        "file",
+        "keys",
+        "mode"
+      ],
+      "properties": {
+        "type": {
+          "const": "key_exists"
+        },
+        "file": {
+          "type": "string"
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "all_required",
+            "any_required"
+          ]
+        }
+      }
+    },
+    "key_value": {
+      "type": "object",
+      "required": [
+        "type",
+        "file",
+        "key",
+        "operator",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "key_value"
+        },
+        "file": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "eq",
+            "neq",
+            "gt",
+            "lt"
+          ]
+        },
+        "value": {}
+      }
+    },
+    "content_starts_with": {
+      "type": "object",
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "content_starts_with"
+        },
+        "value": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "first_line",
+            "first_n_lines"
+          ]
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "required": [
+        "type",
+        "file",
+        "field",
+        "packages",
+        "mode"
+      ],
+      "properties": {
+        "type": {
+          "const": "dependency"
+        },
+        "file": {
+          "type": "string"
+        },
+        "field": {
+          "type": "string"
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "required",
+            "forbidden"
+          ]
+        }
+      }
+    },
+    "logic": {
+      "type": "object",
+      "required": [
+        "type",
+        "operator"
+      ],
+      "properties": {
+        "type": {
+          "const": "logic"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "AND",
+            "OR",
+            "NOT",
+            "IF_THEN"
+          ]
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/condition"
+          }
+        },
+        "if": {
+          "$ref": "#/definitions/condition"
+        },
+        "then": {
+          "$ref": "#/definitions/condition"
+        },
+        "condition": {
+          "$ref": "#/definitions/condition"
+        }
+      }
+    },
+    "code_check": {
+      "type": "object",
+      "required": ["type", "params"],
+      "properties": {
+        "type": { "const": "code_check" },
+        "params": {
+          "type": "object",
+          "properties": {
+            "language": { "type": "string" },
+            "glob": { "type": "string" },
+            "preset": { "type": "string" },
+            "calls": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "object": { "type": "string" },
+                  "method": { "type": "string" }
+                }
+              }
+            },
+            "node_kind": { "type": "string" },
+            "without_child_kind": { "type": "string" },
+            "without_field": { "type": "string" },
+            "scope": { "type": "string", "enum": ["file", "function"] },
+            "max": { "type": "integer", "minimum": 0 },
+            "max_depth": { "type": "integer", "minimum": 1 },
+            "pattern": { "type": "string" },
+            "mode": { "type": "string", "enum": ["must_contain", "must_not_contain"] },
+            "exclude": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "structural": {
+      "type": "object",
+      "required": [
+        "type",
+        "params"
+      ],
+      "properties": {
+        "type": {
+          "const": "structural"
+        },
+        "params": {
+          "type": "object",
+          "required": [
+            "type",
+            "language"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "call_forbidden",
+                "node_forbidden",
+                "count_limit",
+                "nesting_depth"
+              ]
+            },
+            "language": {
+              "type": "string"
+            },
+            "glob": {
+              "type": "string"
+            },
+            "calls": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "object": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "node_kind": {
+              "type": "string"
+            },
+            "without_child_kind": {
+              "type": "string"
+            },
+            "without_field": {
+              "type": "string",
+              "description": "Flag node only when it lacks this field (e.g. bare except: without_field value)"
+            },
+            "scope": {
+              "type": "string",
+              "enum": ["file", "function"],
+              "description": "For count_limit: scope to count within"
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "For count_limit: max allowed count"
+            },
+            "max_depth": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "For nesting_depth: max nesting levels"
+            }
+          }
+        }
+      }
+    },
+    "cross_file": {
+      "type": "object",
+      "required": ["type", "params"],
+      "properties": {
+        "type": { "const": "cross_file" },
+        "params": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": { "enum": ["import_forbidden", "import_required", "no_circular"] },
+            "source_glob": { "type": "string" },
+            "scope_glob": { "type": "string" },
+            "forbidden_imports": { "type": "array", "items": { "type": "string" } },
+            "required_imports": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    }
+  }
+}

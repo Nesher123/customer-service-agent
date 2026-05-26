@@ -1,0 +1,8 @@
+{
+  "check_id": "duplicate_symbols",
+  "message": "Duplicate or similar symbols found. Fix using DRY/SOLID principles.",
+  "violations": [
+    "Symbol \"check_module_import\": scripts/_bonus_b_checks.py, scripts/verify_bonus_a.py — consider extracting to shared function"
+  ],
+  "refactor_guidance": "## DRY (Don't Repeat Yourself)\n\nEvery piece of knowledge should have a single, unambiguous\nrepresentation in the system. Duplicate logic leads to drift when one\ncopy is updated and another is not.\n\n## Applying DRY when duplicate/similar symbols exist\n\n**Same function/method with same params+return in multiple files** —\nExtract to a shared function or module:\n- Go: `shared/parse.go` or `pkg/internal/common.go`\n- Python: `shared/utils.py` or `pkg/common.py`\n- JS/TS: `shared/parse.ts` or `utils/parse.ts`\n\n**Single Responsibility supports DRY** — The extracted function should\nhave one clear purpose. If multiple call sites need slight variants,\nconsider:\n- Parameterizing the shared function\n- A thin wrapper per call site that delegates to the shared implementation\n\n**When to extract** — If 2+ files have identical or nearly identical\nlogic, extract. If the \"duplicate\" is intentional (e.g. test fixtures,\nframework entry points), add a path exception in\ncheck_exceptions.duplicate_symbols.paths or skip_symbols.\n\n**Entrypoints** — For `main`, `__init__`, `setup`, etc., use\nskip_symbols or path exceptions; these are framework-required, not logic\nduplication.\n"
+}

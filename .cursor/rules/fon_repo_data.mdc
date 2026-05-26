@@ -1,0 +1,45 @@
+---
+alwaysApply: true
+description: 'fon repo rules: run fon check, use fon symbols/imports to query DB before planning. Includes general instructions and meaningful sample queries.'
+---
+
+
+> fon note: This generated repo-context file is intentionally local-only. Fon adds it to `.git/info/exclude` for AI context and it should not be committed.
+
+top_dirs:
+    - scripts
+    - src
+    - tests
+
+# fon: General instructions & repo data
+
+Auto-generated. Do not edit by hand.
+
+This repo is **audited by fon**. Code quality, limits, and rules are enforced by `fon check`; the other `fon_*` files in this directory are generated from that audit.
+**What you must do:**
+- Run **`fon check`** after meaningful changes (new code, config, or structure).
+- Treat running fon check as part of the definition of done. Do not skip it when you complete a task.
+
+**Adding a rule:** When the user pastes `fon add new rule` or asks to add a custom rule, run `fon rules add` (no arguments) to load the process guide. Follow the guide: ask audit (file checks) or execution (block commands), generate YAML from the template, show for confirmation, then run `fon rules add <path> --auto-confirm` or `fon rules add execution <path> --auto-confirm` on confirm.
+
+# How to dive deep
+
+**Before planning or exploring:** run `fon symbols` or `fon imports` with no args. You get a summary plus `try_next` with concrete commands. Run those to explore relationships and stats. Data is updated on `fon check`.
+| Query | Purpose |
+|-------|--------|
+| `fon symbols <name>` | Find symbols by name (functions, types, classes) |
+| `fon imports <path>` | See what a file imports and who imports it |
+| `fon symbols` / `fon imports` (no args) | Summary + `try_next` with concrete commands to run |
+**When to use:** Finding where a function/type is defined, understanding what a file imports or who imports it, or exploring the codebase before making changes.
+**Meaningful examples** (most-referenced symbols, most-imported paths):
+
+- `fon symbols graph`
+- `fon symbols invoke`
+- `fon symbols Case`
+- `fon symbols GraphState`
+- `fon symbols get_checkpointer`
+- `fon symbols passed`
+- `fon imports scripts/_verifier_runner.py`
+- `fon imports scripts/_bonus_b_checks.py`
+- `fon imports scripts/verify_task1.py`
+

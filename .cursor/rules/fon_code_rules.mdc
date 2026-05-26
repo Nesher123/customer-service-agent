@@ -1,0 +1,97 @@
+---
+alwaysApply: true
+description: Code quality rules (file limits, checks, exclusions). Auto-generated from checks config.
+---
+
+# Code Quality Rules
+
+Auto-generated. Do not edit by hand.
+
+**Important:** Run `fon check` after meaningful changes (or after adding a feature or doing work) so rules files stay up to date.
+
+**To customize:** (1) **User-defined rules** — use MCP **fon_enrich_guidance** or edit `.fon/check/user-defined.yaml` (YAML: `guidance: { id: { title, content } }`). (2) **Limits, naming, docstrings, exceptions** — edit `.fon/check/config.yaml` (keys: `max_lines_per_file`, `max_lines_per_file_python`, `max_lines_per_file_go`, `max_lines_per_file_js_ts`, `max_files_per_directory`, `exclude_dirs`, `naming`, `docstrings`, `language_conventions`, `check_exceptions`, `docs`). (3) **Custom prose** — put `.md` files in `.fon/check/rules/` (appended below). Run `fon check` to regenerate.
+
+## File Limits
+
+- Max lines per file (default): **300**
+- Max files per directory: **12**
+
+## Excluded Directories
+
+`.git`, `node_modules`, `vendor`, `dist`, `.venv`, `__pycache__`
+
+## Active Checks
+
+- **Directory file count** (`directory_size`)
+  - Fix: Group files into subdirectories by context. Max 10 files per directory.
+  - Example: src/ with 12 files → src/foo/, src/bar/ (each ≤10 files)
+- **First-line doc summary (templated comment)** (`doc_summary`)
+  - Fix: Every exported/public function and type must have a non-empty first line in its doc comment (one-line summary). LLM must add or preserve this when editing. Run fon check --fix to add placeholders for Go and JS/TS; replace with real summary.
+  - Example: // Foo does something. or /** Foo does something. */ or '''Foo does something.''' as first line.
+- **Dockerignore paranoid mode** (`dockerignore_paranoid`)
+  - Fix: If Dockerfile exists, add .dockerignore with first line `**` (ignore all); use `!path` to include only needed files. After changing .dockerignore, run make docker-build to verify the image builds.
+  - Example: First line of .dockerignore: ** then !go !src !README.md
+- **Doc comments (Go)** (`docstrings_go`)
+  - Fix: Add doc comments for exported types and package-level functions in Go files.
+  - Example: // Package pkg does X. and // DoSomething does Y.
+- **Docstrings (Python)** (`docstrings_python`)
+  - Fix: Add docstrings for modules, public classes, and public functions in Python files.
+  - Example: """Module docstring.""" and def foo(): """Docstring."""
+- **Duplicate comments** (`duplicate_comments`)
+  - Fix: Remove consecutive identical comment lines; one comment applies to the line below it.
+  - Example: 3+ identical // fon:ignore X in a row → keep one, remove rest
+- **Duplicate or similar symbols** (`duplicate_symbols`)
+  - Fix: Same function/method name with same params+return in multiple files — consider extracting to a shared function.
+  - Example: Same parseConfig() in a.go and b.go → extract to shared/parse.go
+  - For entrypoints like `main`, add a path exception in `check_exceptions.duplicate_symbols.paths` if desired.
+- **No hardcoded values (use YAML/config)** (`hardcoded_values`)
+  - Fix: Move values to YAML/config; load via load.LoadYAML / load_yaml. Exceptions in schemas/meta/arch-lint-allowlist.yaml.
+  - Example: maxLines := 300 in code → max_lines_per_file or max_lines_per_file_<language> in config.yaml
+- **Unused imports** (`imports`)
+  - Fix: Remove unused imports or add comment if intentional.
+  - Example: Remove unused 'os' from import list or add //nolint with reason.
+- **File line counts** (`lines`)
+  - Fix: Split files so code stays well-written, easy to track, and maintainable, not to "stay under the configured limit". Use clear boundaries and good structure (e.g. single responsibility, domain/feature grouping); prefer a directory with a barrel file (Python `__init__.py`, TS/JS `index.ts`/`index.js`, Go package dir). Avoid flat `prefix_*` sibling files such as `foo_types.ts` or `foo_logic.ts` beside `foo.ts`; those often trigger `prefix_grouping`. Do not randomly break files or move a block just to pass the limit. The line limit (default 300, with optional per-language overrides) is a trigger for review, not the goal.
+  - Example: `my_module.ts` has 650 lines → split by subject into `my_module/` (`index.ts`, `types.ts`, `logic.ts`) instead of flat `my_module_types.ts` siblings. Goal is maintainable structure and easy-to-follow code, not line count; do not break files arbitrarily.
+- **Makefile consistency** (`makefile`)
+  - Fix: Add missing targets to Makefile or document in makefile_targets.
+  - Example: make build referenced in docs but missing from Makefile → add target or document.
+- **Missing translation (i18n)** (`missing_translation`)
+  - Fix: When locales exist, (1) all locale files must have the same keys. (2) Every t('key') used in JS/TS/Vue must exist in all locale files. Otherwise Vue-i18n shows the key as fallback — fine in English, wrong in other locales.
+Add missing keys to each locale file (e.g. en.yaml, he.yaml, en.json, he.json).
+
+  - Example: t('comments') in code → add comments to en.yaml and he.yaml, or en.json and he.json (and all other locales)
+- **File naming conventions** (`naming`)
+  - Fix: Rename files to follow conventions when the language family is enabled. Go and Python use snake_case. Control these with `naming.go_file_naming_enabled` and `naming.python_file_naming_enabled`.
+  - Example: MyModule.go → my_module.go; my_module.py ✓
+- **Go identifier naming** (`naming_identifiers_go`)
+  - Fix: Use PascalCase for exported types/funcs/vars, mixedCaps for unexported (no underscores).
+  - Example: func GetConfig() *Config { var userName string }
+- **Unreferenced code files** (`orphans`)
+  - Fix: Detects code files (.go, .py, .js, .css, .html) not reachable from entry_points. Set orphan_detection.entry_points in config to enable; remove orphans or add to exclude_patterns.
+  - Example: util_old.go not reachable from main → remove or add to exclude_patterns
+- **Prefix grouping (same prefix in same dir)** (`prefix_grouping`)
+  - Fix: When 2+ non-standard files in a directory match the pattern {prefix}_*.* or {prefix}-*.* (any extension, e.g. check_foo.go, ws-chunked.js), group them in a subdirectory (e.g. check/foo.go, ws/chunked.js) or otherwise organize under that prefix. When splitting a large file, prefer prefix/index.ts + prefix/types.ts over flat prefix_types.ts and prefix_logic.ts siblings. Language-standard test and framework filenames such as test_*.py, *_test.go, *.test.ts, *.spec.tsx, and *.module.css are exempt.
+  - Example: check_foo.go, check_bar.yaml or ws-chunked.js, ws-utils.js in same dir → prefix/ subdirectory; foo.ts split → foo/index.ts + foo/types.ts, not foo_types.ts beside foo.ts
+- **Shell script files** (`shell_scripts`)
+  - Fix: Convert .sh files to scripts in project language for portability.
+  - Example: scripts/deploy.sh → scripts/deploy.py or make target
+- **Directory structure** (`structure`)
+  - Fix: Add missing expected directories or update config expected_directories.
+  - Example: Config expects go/, src/; add missing dirs or update .fon/check/config.yaml
+- **TODO/FIXME comments** (`todos`)
+  - Fix: Address TODO/FIXME comments or convert to tracked issues.
+  - Example: Remove or resolve // TODO refactor this; open an issue and reference it.
+- **Types first (go vet, tsc)** (`typecheck`)
+  - Fix: Enforce typing with language-engine tools only (go vet, tsc --noEmit). No extra installs. Docstrings are summary only; no Args/Returns when types are in the signature.
+  - Example: Run go vet on Go, tsc --noEmit on web.
+- **Web assets (JS/TS/HTML/CSS)** (`web_assets`)
+  - Fix: Apply configured line limits to web files. Filename naming is controlled per language family with `naming.javascript_file_naming_enabled`, `naming.typescript_file_naming_enabled`, `naming.html_file_naming_enabled`, and `naming.css_file_naming_enabled`. Legacy `naming.web_asset_naming_extensions` still works as a fallback during migration. When splitting oversized web files, prefer a subdirectory with index.ts/index.js over flat prefix_* sibling files that can trigger prefix_grouping. Allow language-standard exceptions such as *.test.ts, *.spec.tsx, *.d.ts, tool configs, and *.module.css.
+  - Example: Enable HTML/CSS naming to enforce kebab-case; enable JS/TS naming to enforce camelCase/PascalCase. button.test.ts ✓; vite-env.d.ts ✓
+- **Web shared components** (`web_components`)
+  - Fix: Extract duplicate inline modal markup to a shared ConfirmDialog/Modal component. Use base layout for pages.
+  - Example: 2+ files with fixed inset-0 + role='dialog' → extract to components/ConfirmDialog.tsx
+- **YAML schema reference** (`yaml_schema`)
+  - Fix: Every YAML file must have a JSON schema. Known files (schemas/, tests/scenarios/, .fon/) use project schemas (schemas/meta/*.json or scenario-schema.json). Customer/user YAML elsewhere — create a JSON schema from the file content and add
+  - Example: # yaml-language-server: $schema=../meta/checks-schema.json
+

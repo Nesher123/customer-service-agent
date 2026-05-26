@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+description: Repository map (context stats, directory structure, schemas, checks, Makefile targets). Auto-generated from code and YAML.
+---
+
+# Repository Map
+
+Auto-generated from code and YAML. Do not edit by hand.
+
+> fon note: This generated repo-context file is intentionally local-only. Fon adds it to `.git/info/exclude` for AI context and it should not be committed.
+
+## Repository context
+
+- **Languages**: Python
+- **Primary build**: python
+
+- `.cursor/`
+- `.fon/`
+- `src/`
+- `tests/`
+
+## Schemas
+
+
+## Checks (fundamental)
+
+See fon_code_rules.mdc for active checks and their explanations.
+
+## Makefile Targets
+
