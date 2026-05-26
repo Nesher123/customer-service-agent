@@ -1,0 +1,45 @@
+Subject
+-------
+A polished hero illustration for a GitHub README: a "Customer Service Data
+Analyst Agent" that answers questions about the Bitext customer-support
+dataset using LangGraph, tools, and persistent memory.
+
+What to show (one cohesive scene, not a cluttered wireframe)
+------------------------------------------------------------
+Center: a friendly data-analyst assistant (abstract/neutral, not a real
+person) beside a chat interface with two example user bubbles:
+  - "How many refund requests did we get?"
+  - "What should I query next?"
+
+Behind the assistant, a simplified LangGraph flow as a clean node diagram:
+  START → Router (small chip: "classify") branching to:
+    • Agent + Tools loop (ReAct) for structured/unstructured questions
+    • Decline path for out-of-scope
+    • Recommender path for "suggest next query → confirm → execute"
+  Agent connects to a toolbox labeled with 7 tools:
+    list_categories, count_rows, get_examples, get_distribution,
+    search_by_keyword, summarize, list_intents
+
+Storage layer (subtle, bottom or side):
+  • SQLite checkpointer icon → "conversation memory (session)"
+  • JSON profile file icon → "user profile (cross-session)"
+  • Parquet/table icon → "Bitext dataset (~27K rows)"
+
+Mood & style
+------------
+Modern developer-product aesthetic: dark navy or charcoal background,
+teal/cyan accent for graph edges and tool highlights, soft glow on active
+nodes. Flat-vector or light isometric — professional, not cartoonish.
+No stock-photo humans. No cluttered code. Text in the image should be
+minimal and legible (short labels only).
+
+Composition
+-----------
+Landscape 16:9 (e.g. 1600×900). Leave generous negative space on the left
+or top for a future title overlay if needed. High contrast so it reads well
+when scaled down in GitHub README (~800px wide).
+
+Do NOT include
+--------------
+Real company logos, Nebius/Bitext trademarks, copyrighted characters,
+dense paragraphs of text, or a photorealistic office scene.
