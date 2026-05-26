@@ -710,16 +710,9 @@ worth knowing.
 ## Submission
 
 - **Solo submission:** Ofir Nesher.
-- **Repo / zip name:** `customer-support-agent_ofir_nesher`.
+- **Repo / zip name:** `customer-service-agent`.
 - The grader can either clone the repo or unzip the archive and follow
   [Quick start](#quick-start-5-minutes).
 - A `data/` directory containing the parquet cache will be created on first
   run (gitignored / not in zip).
 - A Nebius Token Factory API key is required (`.env`).
-
----
-
-## Coming next
-
-- **Bonus B — Query recommender:** new `recommend` route + a `pending_query`
-  state field so the agent can suggest a follow-up before executing it.
