@@ -56,6 +56,11 @@ flowchart TD
 ## Quick start (5 minutes)
 
 ```bash
+# 0. Get the code (skip if you already have the project directory)
+git clone https://github.com/Nesher123/customer-service-agent.git
+cd customer-service-agent
+# — or unzip customer-service-agent.zip and cd into that folder
+
 # 1. Install dependencies (Python 3.11+, uv)
 uv sync --all-extras --all-groups
 
